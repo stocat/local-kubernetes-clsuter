@@ -1,0 +1,21 @@
+# Minimal Consul values for kind; UI enabled; Connect inject disabled to avoid conflict with Istio
+
+global:
+  name: consul
+
+server:
+  replicas: 1
+  bootstrapExpect: 1
+
+ui:
+  enabled: true
+
+connectInject:
+  enabled: false
+
+controller:
+  enabled: false
+
+meshGateway:
+  enabled: false
+

@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: consul-ui
+  namespace: consul
+spec:
+  hostnames:
+    - consul.local
+  parentRefs:
+    - name: istio-ingressgateway
+      namespace: istio-system
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: consul-ui
+          port: 80
+
