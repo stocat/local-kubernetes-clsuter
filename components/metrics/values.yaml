@@ -1,0 +1,9 @@
+# Values for official metrics-server chart (kubernetes-sigs)
+
+apiService:
+  create: true
+
+# For kind, allow insecure TLS to kubelet and prefer InternalIP
+args:
+  - --kubelet-insecure-tls
+  - --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP

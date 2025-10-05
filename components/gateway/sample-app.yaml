@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+  namespace: default
+  labels:
+    app: echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      containers:
+        - name: echo
+          image: ealen/echo-server:0.8.10
+          ports:
+            - containerPort: 80
+          env:
+            - name: ENABLE__ENVIRONMENT
+              value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: default
+spec:
+  selector:
+    app: echo
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+
+
+
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo2
+  namespace: default
+  labels:
+    app: echo2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo2
+  template:
+    metadata:
+      labels:
+        app: echo2
+    spec:
+      containers:
+        - name: echo2
+          image: ealen/echo-server:0.8.10
+          ports:
+            - containerPort: 80
+          env:
+            - name: ENABLE__ENVIRONMENT
+              value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo2
+  namespace: default
+spec:
+  selector:
+    app: echo2
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+

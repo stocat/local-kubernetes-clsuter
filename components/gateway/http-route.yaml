@@ -1,0 +1,40 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: sample-http
+  namespace: default
+spec:
+  hostnames:
+    - app.local
+  parentRefs:
+    - name: istio-ingressgateway
+      namespace: istio-system
+  hostnames: ["app.local"]
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: echo
+          port: 80
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: sample-http2
+  namespace: default
+spec:
+  parentRefs:
+    - name: istio-ingressgateway
+      namespace: istio-system
+  hostnames: ["api.local"]
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: echo2
+          port: 80

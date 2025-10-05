@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  proxy-nginx:
+    image: nginx:1.27-alpine
+    container_name: k8s-proxy-nginx
+    ports:
+      - "20080:20080"
+      - "21080:21080"
+      - "20443:20443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    # Ensure host.docker.internal resolves on Linux too
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

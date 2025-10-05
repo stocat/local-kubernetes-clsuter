@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway-istio
+  namespace: istio-system
+spec:
+  type: NodePort
+  selector:
+    gateway.networking.k8s.io/gateway-name: istio-ingressgateway
+    gateway.istio.io/managed: istio.io-gateway-controller
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 32080
+    - name: https-443
+      protocol: TCP
+      port: 443
+      targetPort: 443
+      nodePort: 32443
