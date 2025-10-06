@@ -6,6 +6,11 @@ global:
 server:
   replicas: 1
   bootstrapExpect: 1
+  resources:
+    requests:
+      memory: 500Mi
+    limits:
+      memory: 500Mi
 
 ui:
   enabled: true
@@ -19,3 +24,16 @@ controller:
 meshGateway:
   enabled: false
 
+# Sync Kubernetes Services into Consul catalog automatically
+syncCatalog:
+  enabled: true
+  # Register K8s Services into Consul (one-way K8s -> Consul)
+  toConsul: true
+  # Do not create K8s Services from Consul services
+  toK8S: false
+  # Namespace filters (adjust as needed)
+  k8sAllowNamespaces: ["*"]
+  k8sDenyNamespaces:
+    - kube-system
+    - istio-system
+    - consul

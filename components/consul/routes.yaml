@@ -1,0 +1,22 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          routes:
+            - id: catalog
+              uri: lb://demo-catalog-stocat
+              predicates:
+                - Path=/catalog/**
+              filters:
+                - StripPrefix=1
+
+            - id: order
+              uri: lb://demo-order-stocat
+              predicates:
+                - Path=/order/**
+              filters:
+                - StripPrefix=1

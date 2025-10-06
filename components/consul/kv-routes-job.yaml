@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: consul-kv-routes
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: routes
+          configMap:
+            name: consul-kv-routes
+            items:
+              - key: routes.yaml
+                path: routes.yaml
+      containers:
+        - name: kv-routes
+          image: curlimages/curl:8.7.1
+          env:
+            - name: KV_ROUTES_PATH
+              value: ${KV_ROUTES_PATH}
+          volumeMounts:
+            - name: routes
+              mountPath: /config
+          command:
+            - curl
+          args:
+            - --fail
+            - --silent
+            - --show-error
+            - --request
+            - PUT
+            - --data-binary
+            - "@/config/routes.yaml"
+            - "http://consul-ui.consul.svc.cluster.local:80/v1/kv/${KV_ROUTES_PATH}"

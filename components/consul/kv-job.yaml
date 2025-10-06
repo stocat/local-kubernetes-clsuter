@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: consul-kv-init
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: kv
+          image: curlimages/curl:8.7.1
+          env:
+            - name: KV_PATH
+              value: ${KV_PATH}
+            - name: JWT_SECRET
+              value: ${JWT_SECRET}
+          command:
+            - curl
+          args:
+            - --fail
+            - --silent
+            - --show-error
+            - --request
+            - PUT
+            - --data-binary
+            - "${JWT_SECRET}"
+            - "http://consul-ui.consul.svc.cluster.local:80/v1/kv/${KV_PATH}"
