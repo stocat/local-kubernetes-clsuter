@@ -10,6 +10,8 @@ services:
       - "28080:8080"
       # consul-ui
       - "25800:8500"
+      # kiali
+      - "20001:20001"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     # Ensure host.docker.internal resolves on Linux too

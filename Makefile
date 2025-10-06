@@ -11,7 +11,7 @@ KIND_NODE_IMAGE ?= kindest/node:v1.34.0
 ISTIO_PROFILE   ?= minimal
 
 .PHONY: help create delete status kubectx load \
-        metrics istio gateway consul metallb proxy all-istio clean \
+        metrics istio gateway consul kiali metallb proxy all-istio clean \
         ensure-tools ensure-helm
 
 help:
@@ -25,6 +25,7 @@ help:
 	@echo "  make istio          Install Istio (istioctl, profile=$(ISTIO_PROFILE))"
 	@echo "  make gateway        Apply Gateway + HTTPRoute (Gateway API)"
 	@echo "  make consul         Install Consul (Helm)"
+	@echo "  make kiali          Install Kiali + Prometheus + HTTPRoute"
 	@echo "  make metallb        Install MetalLB (optional, for LoadBalancer services)"
 	@echo "  make proxy          Run external NGINX (20080/20443 -> 32080/32443)"
 	@echo "  make all-istio      Create cluster + metrics + Istio"
@@ -74,13 +75,16 @@ gateway: ensure-tools
 consul: ensure-tools ensure-helm
 	@$(MAKE) -C components/consul install CLUSTER_NAME=$(CLUSTER_NAME)
 
+kiali: ensure-tools ensure-helm
+	@$(MAKE) -C components/kiali install CLUSTER_NAME=$(CLUSTER_NAME)
+
 metallb: ensure-tools ensure-helm
 	@$(MAKE) -C components/metallb install CLUSTER_NAME=$(CLUSTER_NAME) IP_RANGE=$(IP_RANGE)
 
 proxy:
 	@$(MAKE) -C components/proxy-nginx up
 
-all: create metrics proxy istio gateway
+all: create metrics proxy istio gateway consul kiali
 
 clean:
 	@echo "[CLEAN] Uninstalling components and deleting cluster '$(CLUSTER_NAME)'"
