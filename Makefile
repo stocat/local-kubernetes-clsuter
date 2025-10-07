@@ -11,7 +11,7 @@ KIND_NODE_IMAGE ?= kindest/node:v1.34.0
 ISTIO_PROFILE   ?= minimal
 
 .PHONY: help create delete status kubectx load \
-        metrics istio gateway consul kiali metallb proxy all-istio clean \
+        metrics istio gateway consul kiali traffic traffic-local metallb proxy all-istio clean \
         ensure-tools ensure-helm
 
 help:
@@ -26,6 +26,8 @@ help:
 	@echo "  make gateway        Apply Gateway + HTTPRoute (Gateway API)"
 	@echo "  make consul         Install Consul (Helm)"
 	@echo "  make kiali          Install Kiali + Prometheus + HTTPRoute"
+	@echo "  make traffic        Install traffic generator (JWT to /catalog,/order)"
+	@echo "  make traffic-local  Run local traffic generator (Node.js)"
 	@echo "  make metallb        Install MetalLB (optional, for LoadBalancer services)"
 	@echo "  make proxy          Run external NGINX (20080/20443 -> 32080/32443)"
 	@echo "  make all-istio      Create cluster + metrics + Istio"
@@ -77,6 +79,19 @@ consul: ensure-tools ensure-helm
 
 kiali: ensure-tools ensure-helm
 	@$(MAKE) -C components/kiali install CLUSTER_NAME=$(CLUSTER_NAME)
+
+traffic: ensure-tools
+	@$(MAKE) -C components/traffic-gen install CLUSTER_NAME=$(CLUSTER_NAME)
+
+traffic-local:
+	@echo "[TRAFFIC] Starting local traffic generator (Ctrl+C to stop)"
+	BASE_URL=$${BASE_URL:-http://localhost:28080} \
+	PATHS=$${PATHS:-catalog/catalogs,order/orders} \
+	INTERVAL_MS=$${INTERVAL_MS:-1000} \
+	CONCURRENCY=$${CONCURRENCY:-1} \
+	JWT_SECRET=$${JWT_SECRET:-replace-with-a-strong-secret-32-bytes-min} \
+	USER_ID=$${USER_ID:-test} \
+	node components/traffic-gen/local.js
 
 metallb: ensure-tools ensure-helm
 	@$(MAKE) -C components/metallb install CLUSTER_NAME=$(CLUSTER_NAME) IP_RANGE=$(IP_RANGE)

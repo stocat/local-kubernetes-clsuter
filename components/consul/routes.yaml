@@ -8,14 +8,14 @@ spring:
               enabled: false
           routes:
             - id: catalog
-              uri: lb://demo-catalog-stocat
+              uri: lb://demo-catalog-stocat-demo
               predicates:
                 - Path=/catalog/**
               filters:
                 - StripPrefix=1
 
             - id: order
-              uri: lb://demo-order-stocat
+              uri: lb://demo-order-stocat-demo
               predicates:
                 - Path=/order/**
               filters:

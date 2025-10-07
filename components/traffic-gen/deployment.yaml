@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traffic-gen-scripts
+data:
+  run.js: |
+    const http = require('http');
+    const https = require('https');
+    const { URL } = require('url');
+    const crypto = require('crypto');
+
+    const BASE = process.env.TARGET_BASE_URL || 'http://istio-ingressgateway-istio.istio-system.svc.cluster.local:80';
+    const HOST_HEADER = process.env.HOST_HEADER || '';
+    const PATHS = (process.env.PATHS || 'catalog/catalogs,order/orders').split(',').map(s => s.trim()).filter(Boolean);
+    const INTERVAL_MS = parseInt(process.env.INTERVAL_MS || '1000', 10);
+    const CONCURRENCY = parseInt(process.env.CONCURRENCY || '1', 10);
+    const SECRET = process.env.JWT_SECRET || 'replace-with-a-strong-secret-32-bytes-min';
+
+    function b64url(buf) {
+      return Buffer.from(buf).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    }
+
+    function makeJwt(payloadObj) {
+      const header = { alg: 'HS256', typ: 'JWT' };
+      const payload = payloadObj;
+      const h = b64url(JSON.stringify(header));
+      const p = b64url(JSON.stringify(payload));
+      const data = `${h}.${p}`;
+      const sig = b64url(crypto.createHmac('sha256', SECRET).update(data).digest());
+      return `${data}.${sig}`;
+    }
+
+    const token = makeJwt({ userId: 'test' });
+    const baseUrl = new URL(BASE.endsWith('/') ? BASE.slice(0, -1) : BASE);
+    const agent = baseUrl.protocol === 'https:' ? new https.Agent({ keepAlive: true }) : new http.Agent({ keepAlive: true });
+    const client = baseUrl.protocol === 'https:' ? https : http;
+
+    function oneRequest(path) {
+      return new Promise((resolve) => {
+        const fullPath = baseUrl.pathname.replace(/\/$/, '') + '/' + path.replace(/^\//, '');
+        const opts = {
+          protocol: baseUrl.protocol,
+          hostname: baseUrl.hostname,
+          port: baseUrl.port || (baseUrl.protocol === 'https:' ? 443 : 80),
+          path: fullPath,
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'User-Agent': 'traffic-gen/1.0'
+          },
+          agent
+        };
+        if (HOST_HEADER) opts.headers.Host = HOST_HEADER;
+        const req = client.request(opts, (res) => {
+          // drain
+          res.resume();
+          res.on('end', () => resolve(res.statusCode));
+        });
+        req.on('error', () => resolve(0));
+        req.end();
+      });
+    }
+
+    async function tick() {
+      const tasks = [];
+      for (let i = 0; i < CONCURRENCY; i++) {
+        for (const p of PATHS) tasks.push(oneRequest(p));
+      }
+      await Promise.all(tasks);
+      setTimeout(tick, INTERVAL_MS);
+    }
+
+    console.log('Traffic generator starting:', { BASE, HOST_HEADER, PATHS, INTERVAL_MS, CONCURRENCY });
+    tick();
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-gen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traffic-gen
+  template:
+    metadata:
+      labels:
+        app: traffic-gen
+    spec:
+      containers:
+        - name: runner
+          image: node:20-alpine
+          command: ["node", "/app/run.js"]
+          env:
+            - name: TARGET_BASE_URL
+              value: ${TARGET_BASE_URL}
+            - name: HOST_HEADER
+              value: ${HOST_HEADER}
+            - name: PATHS
+              value: ${PATHS}
+            - name: INTERVAL_MS
+              value: "${INTERVAL_MS}"
+            - name: CONCURRENCY
+              value: "${CONCURRENCY}"
+            - name: JWT_SECRET
+              value: ${JWT_SECRET}
+          volumeMounts:
+            - name: scripts
+              mountPath: /app
+      volumes:
+        - name: scripts
+          configMap:
+            name: traffic-gen-scripts
+
