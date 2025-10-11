@@ -69,7 +69,7 @@ metrics: ensure-tools ensure-helm
 	@$(MAKE) -C components/metrics install CLUSTER_NAME=$(CLUSTER_NAME)
 
 istio: ensure-tools
-	@$(MAKE) -C components/istio install CLUSTER_NAME=$(CLUSTER_NAME) ISTIO_PROFILE=$(ISTIO_PROFILE)
+	@$(MAKE) -C components/istio install CLUSTER_NAME=$(CLUSTER_NAME) ISTIO_PROFILE=$(ISTIO_PROFILE) ISTIO_VERSION=$(ISTIO_VERSION)
 
 gateway: ensure-tools
 	@$(MAKE) -C components/gateway install CLUSTER_NAME=$(CLUSTER_NAME)
@@ -104,7 +104,7 @@ all: create metrics proxy istio gateway consul kiali
 clean:
 	@echo "[CLEAN] Uninstalling components and deleting cluster '$(CLUSTER_NAME)'"
 	@$(MAKE) -C components/metrics uninstall CLUSTER_NAME=$(CLUSTER_NAME) || true
-	@$(MAKE) -C components/istio uninstall CLUSTER_NAME=$(CLUSTER_NAME) || true
+	@$(MAKE) -C components/istio uninstall CLUSTER_NAME=$(CLUSTER_NAME) ISTIO_VERSION=$(ISTIO_VERSION) || true
 	@$(MAKE) -C components/consul uninstall CLUSTER_NAME=$(CLUSTER_NAME) || true
 	@$(MAKE) -C components/gateway clean CLUSTER_NAME=$(CLUSTER_NAME) || true
 	@$(MAKE) -C components/proxy-nginx down || true

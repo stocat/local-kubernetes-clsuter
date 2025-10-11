@@ -15,11 +15,17 @@ ensure-tools:
 	@command -v curl >/dev/null 2>&1 || { echo "[ERR] curl not found"; exit 1; }
 
 ensure-istioctl:
-	@if command -v istioctl >/dev/null 2>&1; then \
-	  echo "[ISTIO] istioctl found in PATH"; \
-	elif [ -x "$(ISTIOCTL_LOCAL)" ]; then \
-	  echo "[ISTIO] Using local $(ISTIOCTL_LOCAL)"; \
+	@mkdir -p "$(LOCAL_BIN)"
+	@if [ -x "$(ISTIOCTL_LOCAL)" ]; then \
+	  CUR_VER=$$($(ISTIOCTL_LOCAL) version --remote=false --short 2>/dev/null || echo unknown); \
+	  if [ "$$CUR_VER" = "$(ISTIO_VERSION)" ]; then \
+	    echo "[ISTIO] Using local $(ISTIOCTL_LOCAL) (v$$CUR_VER)"; \
+	  else \
+	    echo "[ISTIO] Detected local istioctl v$$CUR_VER; need v$(ISTIO_VERSION). Downloading..."; \
+	    $(MAKE) download-istioctl; \
+	  fi; \
 	else \
+	  echo "[ISTIO] Local istioctl not found. Downloading v$(ISTIO_VERSION)"; \
 	  $(MAKE) download-istioctl; \
 	fi
 
@@ -36,7 +42,7 @@ install: ensure-tools ensure-istioctl
 	@echo "[ISTIO] Context => kind-$(CLUSTER_NAME)"
 	kubectl config use-context kind-$(CLUSTER_NAME) >/dev/null
 	@echo "[ISTIO] Installing Istio (profile=$(ISTIO_PROFILE))"
-	$$( [ -x "$(ISTIOCTL_LOCAL)" ] && echo "$(ISTIOCTL_LOCAL)" || echo istioctl ) install -y \
+	$(ISTIOCTL_LOCAL) install -y \
 	  --set profile=$(ISTIO_PROFILE) \
 	  --set values.pilot.env.PILOT_ENABLE_GATEWAY_API=true \
 	  --set values.sidecarInjectorWebhook.enableNamespacesByDefault=true
@@ -62,7 +68,7 @@ exclude-namespace: ensure-tools
 
 uninstall: ensure-tools ensure-istioctl
 	@echo "[ISTIO] Uninstalling Istio"
-	$$( [ -x "$(ISTIOCTL_LOCAL)" ] && echo "$(ISTIOCTL_LOCAL)" || echo istioctl ) uninstall -y --purge
+	$(ISTIOCTL_LOCAL) uninstall -y --purge
 	kubectl delete namespace istio-system --ignore-not-found
 
 clean: uninstall

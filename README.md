@@ -35,7 +35,7 @@
   - 최신 노드 이미지: `KIND_NODE_IMAGE ?= kindest/node:v1.34.0`
 - Istio
   - `make istio`: Istio 설치 + Gateway API 활성화 + ingressgateway NodePort(32080/32443) 설정 + default NS 라벨 + 전체 NS 라벨(옵션 1)
-  - istioctl 자동 설치: 없으면 `bin/istioctl`로 내려받아 사용
+  - istioctl 버전 고정 사용: 항상 `bin/istioctl`(ISTIO_VERSION)로 실행하며, 지정 버전이 없으면 기본값으로 내려받아 사용
 - Metrics
   - `make metrics`: 공식 metrics-server 차트 설치(values.yaml 적용)
 - Gateway
