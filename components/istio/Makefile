@@ -2,6 +2,10 @@
 
 ISTIO_PROFILE     ?= minimal
 ISTIO_VERSION     ?= 1.27.1
+# If ISTIO_VERSION was passed as an empty override from parent, fix it here
+ifeq ($(strip $(ISTIO_VERSION)),)
+override ISTIO_VERSION := 1.27.1
+endif
 NAMESPACE         ?= default
 ROOT_DIR      := $(abspath $(CURDIR)/../..)
 LOCAL_BIN     := $(ROOT_DIR)/bin
@@ -72,4 +76,3 @@ uninstall: ensure-tools ensure-istioctl
 	kubectl delete namespace istio-system --ignore-not-found
 
 clean: uninstall
-	

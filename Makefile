@@ -9,6 +9,7 @@ KIND_NODE_IMAGE ?= kindest/node:v1.34.0
 
 # Addon versions (override as needed)
 ISTIO_PROFILE   ?= minimal
+ISTIO_VERSION   ?= 1.27.1
 
 .PHONY: help create delete status kubectx load \
         metrics istio gateway consul kiali traffic traffic-local metallb proxy all-istio clean \
