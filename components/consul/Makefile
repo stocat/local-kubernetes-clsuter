@@ -21,12 +21,17 @@ repo: ensure-helm
 	@helm repo add hashicorp https://helm.releases.hashicorp.com >/dev/null
 	@helm repo update >/dev/null
 
-install: ensure-tools ensure-helm repo
+.PHONY: ns
+ns:
+	kubectl --context kind-$(CLUSTER_NAME) get ns $(NAMESPACE) >/dev/null 2>&1 || kubectl --context kind-$(CLUSTER_NAME) create ns $(NAMESPACE)
+	kubectl --context kind-$(CLUSTER_NAME) label ns $(NAMESPACE) istio-injection=disabled --overwrite # istio 비활성화
+
+install: ensure-tools ensure-helm repo ns
 	@echo "[CONSUL] Context => kind-$(CLUSTER_NAME)"
 	kubectl config use-context kind-$(CLUSTER_NAME) >/dev/null
 	@echo "[CONSUL] Installing $(RELEASE) via Helm in $(NAMESPACE)"
 	helm upgrade --install $(RELEASE) $(CHART) \
-	  --namespace $(NAMESPACE) --create-namespace \
+	  --namespace $(NAMESPACE) \
 	  -f $(CURDIR)/values.yaml
 	@$(MAKE) wait
 	@$(MAKE) route CLUSTER_NAME=$(CLUSTER_NAME)
