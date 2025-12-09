@@ -2,9 +2,10 @@
 
 .PHONY: ensure-tools ensure-helm repo install wait uninstall apply-pool
 
-NAMESPACE ?= metallb-system
-RELEASE   ?= metallb
-CHART     ?= metallb/metallb
+NAMESPACE 			?= metallb-system
+RELEASE   			?= metallb
+CHART     			?= metallb/metallb
+CLUSTER_NAME        ?= stocat-local
 # Example: IP_RANGE=172.18.255.200-172.18.255.250
 IP_RANGE  ?=
 

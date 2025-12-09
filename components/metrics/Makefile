@@ -1,8 +1,9 @@
 # Metrics component Makefile (Helm - metrics-server)
 
-NAMESPACE ?= kube-system
-RELEASE   ?= metrics-server
-CHART     ?= metrics-server/metrics-server
+NAMESPACE 		?= kube-system
+RELEASE   		?= metrics-server
+CHART     		?= metrics-server/metrics-server
+CLUSTER_NAME    ?= stocat-local
 
 .PHONY: install wait ensure-tools ensure-helm repo uninstall clean
 

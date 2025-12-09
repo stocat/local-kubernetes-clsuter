@@ -1,0 +1,14 @@
+architecture: standalone
+
+auth:
+  enabled: false
+
+master:
+  persistence:
+    enabled: true
+    size: 5Gi
+  service:
+    type: ClusterIP
+    port: 6379
+  extraFlags:
+    - "--appendonly yes"

@@ -1,15 +1,17 @@
 # Istio component Makefile (istioctl-based)
 
-ISTIO_PROFILE     ?= minimal
-ISTIO_VERSION     ?= 1.27.1
+ISTIO_PROFILE     := minimal
+ISTIO_VERSION     := 1.27.1
 # If ISTIO_VERSION was passed as an empty override from parent, fix it here
 ifeq ($(strip $(ISTIO_VERSION)),)
 override ISTIO_VERSION := 1.27.1
 endif
-NAMESPACE         ?= default
-ROOT_DIR      := $(abspath $(CURDIR)/../..)
-LOCAL_BIN     := $(ROOT_DIR)/bin
-ISTIOCTL_LOCAL := $(LOCAL_BIN)/istioctl
+
+NAMESPACE       := default
+ROOT_DIR      	:= $(abspath $(CURDIR)/../..)
+LOCAL_BIN     	:= $(ROOT_DIR)/bin
+ISTIOCTL_LOCAL 	:= $(LOCAL_BIN)/istioctl
+CLUSTER_NAME 	:= stocat-local
 
 .PHONY: install wait uninstall ensure-tools ensure-istioctl clean \
         download-istioctl include-namespace exclude-namespace

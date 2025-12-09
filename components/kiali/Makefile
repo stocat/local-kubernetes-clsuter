@@ -1,6 +1,6 @@
 # Kiali component (Helm) + Prometheus addon
 
-CLUSTER_NAME     ?= kind-local
+CLUSTER_NAME     ?= stocat-local
 NAMESPACE        ?= istio-system
 RELEASE          ?= kiali-server
 CHART            ?= kiali/kiali-server

@@ -28,6 +28,8 @@
   - `metrics/` — metrics-server 설치: see `components/metrics/README.md`
   - `proxy-nginx/` — 외부 프록시: see `components/proxy-nginx/README.md`
   - `gateway/` — Gateway/HTTPRoute 샘플: see `components/gateway/README.md`
+  - `mysql/` — docker-compose MySQL을 그대로 옮긴 커스텀 Helm 차트
+  - `redis/` — Bitnami Redis 차트 래퍼 (docker-compose Redis 대체)
 
 주요 Make 타깃
 - 클러스터
@@ -40,6 +42,9 @@
   - `make metrics`: 공식 metrics-server 차트 설치(values.yaml 적용)
 - Gateway
   - `make gateway`: Gateway API 활성화 + `Gateway(20080)` + ingressgateway NodePort(32080/32443) 설정
+- 데이터 스토어
+  - `make mysql`: 커스텀 MySQL 차트 (도커 컴포즈 설정과 동일)
+  - `make redis`: Bitnami Redis 차트 (도커 컴포즈 Redis 대체)
 - Proxy
   - `make proxy`: 외부 NGINX 20080/20443 리스닝 → 32080/32443 패스스루
 - 정리

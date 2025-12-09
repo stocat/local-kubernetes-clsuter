@@ -1,4 +1,4 @@
-CLUSTER_NAME ?= kind-local
+CLUSTER_NAME ?= stocat-local
 
 .PHONY: install uninstall clean app ensure-tools gateway-api
 

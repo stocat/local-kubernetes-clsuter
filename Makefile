@@ -1,7 +1,7 @@
 # Simple Makefile to manage a local Kubernetes cluster with kind
 
 # -------- Variables --------
-CLUSTER_NAME ?= kind-local
+CLUSTER_NAME ?= stocat-local
 KIND_CONFIG  ?= config/kind-config.yaml
 # Pin a known-good kind node image; override if you need another K8s version
 # Use a recent Kubernetes version for kind nodes (override as needed)
@@ -12,7 +12,7 @@ ISTIO_PROFILE   ?= minimal
 ISTIO_VERSION   ?= 1.27.1
 
 .PHONY: help create delete status kubectx load \
-        metrics istio gateway consul kiali traffic traffic-local metallb proxy all-istio clean \
+        metrics istio gateway consul kiali mysql redis traffic traffic-local metallb proxy all-istio clean \
         ensure-tools ensure-helm
 
 help:
@@ -27,6 +27,8 @@ help:
 	@echo "  make gateway        Apply Gateway + HTTPRoute (Gateway API)"
 	@echo "  make consul         Install Consul (Helm)"
 	@echo "  make kiali          Install Kiali + Prometheus + HTTPRoute"
+	@echo "  make mysql          Install custom MySQL Helm chart"
+	@echo "  make redis          Install Bitnami Redis (Helm)"
 	@echo "  make traffic        Install traffic generator (JWT to /catalog,/order)"
 	@echo "  make traffic-local  Run local traffic generator (Node.js)"
 	@echo "  make metallb        Install MetalLB (optional, for LoadBalancer services)"
@@ -81,6 +83,12 @@ consul: ensure-tools ensure-helm
 kiali: ensure-tools ensure-helm
 	@$(MAKE) -C components/kiali install CLUSTER_NAME=$(CLUSTER_NAME)
 
+mysql: ensure-tools ensure-helm
+	@$(MAKE) -C components/mysql install CLUSTER_NAME=$(CLUSTER_NAME)
+
+redis: ensure-tools ensure-helm
+	@$(MAKE) -C components/redis install CLUSTER_NAME=$(CLUSTER_NAME)
+
 traffic: ensure-tools
 	@$(MAKE) -C components/traffic-gen install CLUSTER_NAME=$(CLUSTER_NAME)
 
@@ -100,13 +108,15 @@ metallb: ensure-tools ensure-helm
 proxy:
 	@$(MAKE) -C components/proxy-nginx up
 
-all: create metrics proxy istio gateway consul kiali
+all: create metrics proxy istio gateway consul mysql redis kiali
 
 clean:
 	@echo "[CLEAN] Uninstalling components and deleting cluster '$(CLUSTER_NAME)'"
 	@$(MAKE) -C components/metrics uninstall CLUSTER_NAME=$(CLUSTER_NAME) || true
 	@$(MAKE) -C components/istio uninstall CLUSTER_NAME=$(CLUSTER_NAME) ISTIO_VERSION=$(ISTIO_VERSION) || true
 	@$(MAKE) -C components/consul uninstall CLUSTER_NAME=$(CLUSTER_NAME) || true
+	@$(MAKE) -C components/mysql uninstall CLUSTER_NAME=$(CLUSTER_NAME) || true
+	@$(MAKE) -C components/redis uninstall CLUSTER_NAME=$(CLUSTER_NAME) || true
 	@$(MAKE) -C components/gateway clean CLUSTER_NAME=$(CLUSTER_NAME) || true
 	@$(MAKE) -C components/proxy-nginx down || true
 	@$(MAKE) delete || true

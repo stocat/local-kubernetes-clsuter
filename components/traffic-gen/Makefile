@@ -1,4 +1,4 @@
-CLUSTER_NAME        ?= kind-local
+CLUSTER_NAME        ?= stocat-local
 NAMESPACE           ?= default
 
 # Traffic settings (override as needed)

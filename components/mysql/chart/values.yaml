@@ -1,0 +1,59 @@
+replicaCount: 1
+
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3306
+  annotations: {}
+
+auth:
+  rootPassword: rootpassword
+  username: user
+  password: password
+  database: stocat
+  rootHost: "%"
+
+timezone: UTC
+
+args:
+  - "--default-authentication-plugin=mysql_native_password"
+  - "--character-set-server=utf8mb4"
+  - "--collation-server=utf8mb4_general_ci"
+  - "--init-connect=SET NAMES utf8mb4"
+
+resources: {}
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  storageClass: ""
+  existingClaim: ""
+
+nodeSelector: {}
+affinity: {}
+tolerations: []
+podAnnotations: {}
+podLabels: {}
+extraEnv: []
+extraVolumeMounts: []
+extraVolumes: []
+
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readiness:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6

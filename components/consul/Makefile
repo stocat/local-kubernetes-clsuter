@@ -3,7 +3,7 @@
 NAMESPACE        ?= consul
 RELEASE          ?= consul
 CHART            ?= hashicorp/consul
-CLUSTER_NAME     ?= kind-local
+CLUSTER_NAME     ?= stocat-local
 KV_PATH          ?= config/common/secrets/jwt-secret
 JWT_SECRET       ?= replace-with-a-strong-secret-32-bytes-min
 KV_ROUTES_PATH   ?= config/gateway/routes.yaml
